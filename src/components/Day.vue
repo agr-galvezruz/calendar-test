@@ -57,17 +57,26 @@ export default {
 
 <style lang="sass">
 .day
-  padding: 10px
+  width: 100%
+  height: 100%
+
+.blue, .red, .yellow, .green, .white
+  border: 1px solid
 
 .blue
+  border-color: #4473e2
   background-color: #4473e2
 .red
-  background-color: #8e3430
+  border-color: #8e3430
+  background-color: #ead9d9
 .yellow
+  border-color: yellow
   background-color: yellow
 .green
+  border-color: #69ac5b
   background-color: #69ac5b
 .white
+  border-color: #ffffff
   background-color: #ffffff
 
 
