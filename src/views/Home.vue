@@ -2,8 +2,8 @@
   #calendar.flex-center-center
     table.calendar-container
       tr
-        td.big-column EMPLEADOS
-        td(v-for="day in calendar_data" :key="day.fecha" :class="getColor(day)") {{ day.fecha.toString().substr(day.fecha.toString().length - 2) }}
+        td.no-data
+        td.months-header(v-for="(days, year_month_index) in date_info" :colspan="days") {{ getMonth(year_month_index) }}
 
       tr
         td.no-data
@@ -14,6 +14,7 @@
       tr(v-for="employee in employees")
         td.flex-center-space-between
           .flex-center
+            img.user-img(src="@/icons/user.png")
             .employee-name {{ employee.name }}
           .remaining-vacation-days {{ getRemainingDays(employee) }}
 
@@ -36,13 +37,17 @@ export default {
         diasVacacionesSeleccionados: 0
       }
     })
+
+    this.getDateInfo()
   },
   components: {
     Day
   },
   data() {
     return {
+      months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
       calendar_data: CalendarData.datos,
+      date_info: [],
       max_free_days: 22,
       employees: [
         { name: 'Antonio Gálvez Ruz' },
@@ -82,6 +87,19 @@ export default {
 
       // Devolvemos el nombre de la clase para los estilos
       return color_class
+    },
+    getDateInfo() {
+      // Esta función cuenta los días por meses y los agrupa por años ya que el mes de febrero puede ser variable
+      // y también contemplando la posibilidad de que no se pase un año completo, sino unos meses y fechas específicas
+
+      // Array de fechas sin el día. Ej: [202101, 202102]
+      const arr_year_months = this.calendar_data.map( ({ fecha }) => parseInt(fecha / 100) )
+
+      // Agrupa por apariciones de cada mes pertenecientes a un año
+      this.date_info = arr_year_months.reduce((prev, curr) => (prev[curr] = ++prev[curr] || 1, prev), {})
+    },
+    getMonth(year_month_index) {
+      return this.months[(year_month_index - 1) % 100]
     },
     getDay(date) {
       return (date % 100)
@@ -146,6 +164,9 @@ export default {
           background-color: #444
           height: 30px
           padding: 0 1px
+      .user-img
+        width: 18px
+        margin: 0 10px 0 0
 
     td.no-data
       background-color: #ffffff
