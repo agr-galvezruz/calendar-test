@@ -12,11 +12,8 @@
       .employee-header EMPLEADOS
 
       tr(v-for="employee in employees")
-        td.flex-center-space-between
-          .flex-center
-            img.user-img(src="@/icons/user.png")
-            .employee-name {{ employee.name }}
-          .remaining-vacation-days {{ getRemainingDays(employee) }}
+        td
+          EmployeeInfo(:employee="employee" :max_free_days="max_free_days")
 
         td(v-for="day in employee.fechas" :key="day.fecha")
           Day(v-model="day.tipoId" :day="day" :canSelectDay="canSelectDay(employee)" @input="changeVacationDaysSelected(employee)")
@@ -26,6 +23,7 @@
 // Al ser un ejemplo, los datos json están guardados en '/data/calendario'
 import CalendarData from '@/data/calendario'
 import Day from '@/components/Day.vue'
+import EmployeeInfo from '@/components/EmployeeInfo.vue'
 
 export default {
   name: 'Home',
@@ -44,7 +42,8 @@ export default {
     this.getDateInfo()
   },
   components: {
-    Day
+    Day,
+    EmployeeInfo
   },
   data() {
     return {
@@ -58,10 +57,6 @@ export default {
     }
   },
   methods: {
-    getRemainingDays(employee_data) {
-      const vacation_days = employee_data.fechas.filter(fecha => fecha.tipoId === 'V').length
-      return `${this.max_free_days - vacation_days} / ${this.max_free_days}`
-    },
     changeVacationDaysSelected(employee_data) {
       const vacation_days = employee_data.fechas.filter(fecha => fecha.tipoId === 'V').length
       employee_data.diasVacacionesSeleccionados = vacation_days
@@ -155,10 +150,6 @@ export default {
         text-align: left
         padding: 0 10px
         border-color: #cccccc
-        .remaining-vacation-days
-          background-color: #69ac5b
-          padding: 2px 4px
-          color: #ffffff
         &::after
           content: ''
           position: absolute
@@ -167,9 +158,6 @@ export default {
           background-color: #444
           height: 30px
           padding: 0 1px
-      .user-img
-        width: 18px
-        margin: 0 10px 0 0
 
     td.no-data
       background-color: #ffffff
