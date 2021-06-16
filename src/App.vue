@@ -4,6 +4,15 @@
   </div>
 </template>
 
+<script>
+export default {
+  created() {
+    // Lee el listado de empleados de localstorge
+    this.$store.dispatch('UpdateEmployees')
+  }
+}
+</script>
+
 <style lang="sass">
 *
   margin: 0
@@ -36,6 +45,7 @@
 /* Handle */
 ::-webkit-scrollbar-thumb
   background: #888
+  border-radius: 5px
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover

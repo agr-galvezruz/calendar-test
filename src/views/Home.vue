@@ -30,13 +30,16 @@ import Day from '@/components/Day.vue'
 export default {
   name: 'Home',
   created() {
-    this.employees = this.employees.map(employee => {
-      return {
-        ...employee,
-        fechas: JSON.parse(JSON.stringify(CalendarData.datos)),
-        diasVacacionesSeleccionados: 0
-      }
-    })
+    const local_storage_employees_data = this.$store.getters.getEmployeesList
+    if (!local_storage_employees_data.length) {
+      this.employees = this.employees.map(employee => {
+        return {
+          ...employee,
+          fechas: JSON.parse(JSON.stringify(CalendarData.datos)),
+          diasVacacionesSeleccionados: 0
+        }
+      })
+    } else this.employees = local_storage_employees_data
 
     this.getDateInfo()
   },
@@ -45,7 +48,6 @@ export default {
   },
   data() {
     return {
-      months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
       calendar_data: CalendarData.datos,
       date_info: [],
       max_free_days: 22,
@@ -99,7 +101,8 @@ export default {
       this.date_info = arr_year_months.reduce((prev, curr) => (prev[curr] = ++prev[curr] || 1, prev), {})
     },
     getMonth(year_month_index) {
-      return this.months[(year_month_index - 1) % 100]
+      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+      return months[(year_month_index - 1) % 100]
     },
     getDay(date) {
       return (date % 100)
