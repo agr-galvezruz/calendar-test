@@ -22,7 +22,7 @@ export default {
   },
   methods: {
     clickDay() {
-      // Comprobamos que se pueda quedir o quitar un día
+      // Comprobamos que se pueda quedar o quitar un día
       if ((this.day.tipoId === '' && this.canSelectDay) || (this.day.tipoId === 'V')) {
         this.value = this.value === '' ? 'V' : ''
         this.$emit('input', this.value)
