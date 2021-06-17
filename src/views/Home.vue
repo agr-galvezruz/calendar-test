@@ -9,11 +9,25 @@
         td.no-data
         td(v-for="day in calendar_data" :key="day.fecha" :class="getColor(day)") {{ getDay(day.fecha) }}
 
-      .employee-header EMPLEADOS
+      .employee-header
+        .header-box.flex-center-space-between
+          .flex-center
+            img.add-employee(src="@/icons/plus.png" width="20" @click="addNewEmployee()")
+            .title EMPLEADOS
+          .flex-center-space-between
+            img.edit-employee(v-if="!actions" src="@/icons/settings.png" width="20" @click="switchEmployeesActions()")
+            img.edit-employee(v-else src="@/icons/check.png" width="20" @click="switchEmployeesActions()")
 
-      tr(v-for="employee in employees")
+
+      tr(v-for="(employee, index) in employees")
         td
-          EmployeeInfo(:employee="employee" :max_free_days="max_free_days")
+          Employee(
+            :employee="employee"
+            :index_array="index"
+            :max_free_days="max_free_days"
+            :show_actions="actions"
+            @saveEmployee="updateEmployeesOnLocalStore"
+            @removeEmployee="removeEmployee")
 
         td(v-for="day in employee.fechas" :key="day.fecha")
           Day(v-model="day.tipoId" :day="day" :canSelectDay="canSelectDay(employee)" @input="changeVacationDaysSelected(employee)")
@@ -23,7 +37,7 @@
 // Al ser un ejemplo, los datos json están guardados en '/data/calendario'
 import CalendarData from '@/data/calendario'
 import Day from '@/components/Day.vue'
-import EmployeeInfo from '@/components/EmployeeInfo.vue'
+import Employee from '@/components/Employee.vue'
 
 export default {
   name: 'Home',
@@ -34,7 +48,8 @@ export default {
         return {
           ...employee,
           fechas: JSON.parse(JSON.stringify(CalendarData.datos)),
-          diasVacacionesSeleccionados: 0
+          diasVacacionesSeleccionados: 0,
+          editName: false
         }
       })
     } else this.employees = local_storage_employees_data
@@ -43,13 +58,14 @@ export default {
   },
   components: {
     Day,
-    EmployeeInfo
+    Employee
   },
   data() {
     return {
       calendar_data: CalendarData.datos,
       date_info: [],
       max_free_days: 22,
+      actions: false,
       employees: [
         { name: 'Antonio Gálvez Ruz' },
         { name: 'Alfonso Pérez Guzmán' }
@@ -57,12 +73,15 @@ export default {
     }
   },
   methods: {
+    updateEmployeesOnLocalStore() {
+      // Esto guarda el listado de empleados en el store de Vuex
+      this.$store.dispatch('StoreEmployees', this.employees)
+    },
     changeVacationDaysSelected(employee_data) {
       const vacation_days = employee_data.fechas.filter(fecha => fecha.tipoId === 'V').length
       employee_data.diasVacacionesSeleccionados = vacation_days
 
-      // Esto guarda el listado de empleados en el store de Vuex
-      this.$store.dispatch('StoreEmployees', this.employees)
+      this.updateEmployeesOnLocalStore()
     },
     canSelectDay(employee_data) {
       return (employee_data.diasVacacionesSeleccionados < this.max_free_days)
@@ -101,6 +120,24 @@ export default {
     },
     getDay(date) {
       return (date % 100)
+    },
+    addNewEmployee() {
+      const new_employee = {
+        name: null,
+        fechas: JSON.parse(JSON.stringify(CalendarData.datos)),
+        diasVacacionesSeleccionados: 0,
+        editName: true
+      }
+      // Comprueba que no haya algún empleado sin guardar antes de insertar uno más
+      const editing_employees = this.employees.filter(employee => employee.editName)
+      if (!editing_employees.length) this.employees.unshift(JSON.parse(JSON.stringify(new_employee)))
+    },
+    removeEmployee(index) {
+      this.employees.splice(index, 1)
+      this.updateEmployeesOnLocalStore()
+    },
+    switchEmployeesActions() {
+      this.actions = !this.actions
     }
   }
 }
@@ -173,6 +210,18 @@ export default {
       left: 0
       display: flex
       align-items: center
-      padding: 0 10px
+      .header-box
+        padding: 0 10px
+        width: 350px
+        .add-employee,.edit-employee
+          width: 18px
+          margin: 0 10px 0 0
+          cursor: pointer
+          transition: .3s
+          &:hover
+            opacity: 0.8
+            transform: scale(1.2)
+        .edit-employee
+          margin: 6px
 
 </style>
